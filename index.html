@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>康威生命游戏</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(20, 25px);
+            gap: 1px;
+            background-color: #ccc;
+            padding: 1px;
+            margin-bottom: 20px;
+        }
+        
+        .cell {
+            width: 25px;
+            height: 25px;
+            background-color: #fff;
+            cursor: pointer;
+        }
+        
+        .cell.alive {
+            background-color: #2ecc71;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        button {
+            padding: 10px 20px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            background-color: #3498db;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .info {
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>康威生命游戏</h1>
+    
+    <div class="controls">
+        <button id="startBtn">开始</button>
+        <button id="pauseBtn" disabled>暂停</button>
+        <button id="resetBtn">重置</button>
+        <button id="stepBtn">单步</button>
+    </div>
+    
+    <div class="info">
+        <p>代数: <span id="generation">0</span></p>
+    </div>
+    
+    <div id="grid"></div>
+    
+    <div class="info">
+        <p>规则：孤独死亡(&lt;2邻居) | 拥挤死亡(&gt;3邻居) | 平衡存活(2-3邻居) | 繁殖(正好3邻居)</p>
+    </div>
+
+    <script>
+        const GRID_SIZE = 20;
+        const ALIVE_PROBABILITY = 0.2;
+        let grid = [];
+        let generation = 0;
+        let isRunning = false;
+        let intervalId = null;
+        
+        const gridElement = document.getElementById('grid');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const stepBtn = document.getElementById('stepBtn');
+        const generationSpan = document.getElementById('generation');
+        
+        // 初始化网格
+        function initGrid() {
+            grid = [];
+            for (let i = 0; i < GRID_SIZE; i++) {
+                grid[i] = [];
+                for (let j = 0; j < GRID_SIZE; j++) {
+                    grid[i][j] = Math.random() < ALIVE_PROBABILITY ? 1 : 0;
+                }
+            }
+            generation = 0;
+            updateDisplay();
+        }
+        
+        // 创建网格DOM
+        function createGridDOM() {
+            gridElement.innerHTML = '';
+            for (let i = 0; i < GRID_SIZE; i++) {
+                for (let j = 0; j < GRID_SIZE; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    cell.addEventListener('click', toggleCell);
+                    gridElement.appendChild(cell);
+                }
+            }
+        }
+        
+        // 切换细胞状态
+        function toggleCell(e) {
+            if (isRunning) return;
+            const row = parseInt(e.target.dataset.row);
+            const col = parseInt(e.target.dataset.col);
+            grid[row][col] = grid[row][col] ? 0 : 1;
+            updateDisplay();
+        }
+        
+        // 计算邻居数量
+        function countNeighbors(row, col) {
+            let count = 0;
+            for (let i = -1; i <= 1; i++) {
+                for (let j = -1; j <= 1; j++) {
+                    if (i === 0 && j === 0) continue;
+                    const newRow = (row + i + GRID_SIZE) % GRID_SIZE;
+                    const newCol = (col + j + GRID_SIZE) % GRID_SIZE;
+                    count += grid[newRow][newCol];
+                }
+            }
+            return count;
+        }
+        
+        // 更新网格（应用生命游戏规则）
+        function updateGrid() {
+            const newGrid = [];
+            for (let i = 0; i < GRID_SIZE; i++) {
+                newGrid[i] = [];
+                for (let j = 0; j < GRID_SIZE; j++) {
+                    const neighbors = countNeighbors(i, j);
+                    const isAlive = grid[i][j];
+                    
+                    if (isAlive) {
+                        // 活细胞规则
+                        if (neighbors < 2 || neighbors > 3) {
+                            newGrid[i][j] = 0; // 孤独死亡或拥挤死亡
+                        } else {
+                            newGrid[i][j] = 1; // 平衡存活
+                        }
+                    } else {
+                        // 死细胞规则
+                        if (neighbors === 3) {
+                            newGrid[i][j] = 1; // 繁殖
+                        } else {
+                            newGrid[i][j] = 0;
+                        }
+                    }
+                }
+            }
+            grid = newGrid;
+            generation++;
+            updateDisplay();
+        }
+        
+        // 更新显示
+        function updateDisplay() {
+            const cells = gridElement.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                const row = parseInt(cell.dataset.row);
+                const col = parseInt(cell.dataset.col);
+                if (grid[row][col]) {
+                    cell.classList.add('alive');
+                } else {
+                    cell.classList.remove('alive');
+                }
+            });
+            generationSpan.textContent = generation;
+        }
+        
+        // 开始
+        function start() {
+            if (isRunning) return;
+            isRunning = true;
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+            stepBtn.disabled = true;
+            intervalId = setInterval(updateGrid, 200);
+        }
+        
+        // 暂停
+        function pause() {
+            if (!isRunning) return;
+            isRunning = false;
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            stepBtn.disabled = false;
+            clearInterval(intervalId);
+        }
+        
+        // 重置
+        function reset() {
+            pause();
+            initGrid();
+        }
+        
+        // 单步执行
+        function step() {
+            if (isRunning) return;
+            updateGrid();
+        }
+        
+        // 事件监听
+        startBtn.addEventListener('click', start);
+        pauseBtn.addEventListener('click', pause);
+        resetBtn.addEventListener('click', reset);
+        stepBtn.addEventListener('click', step);
+        
+        // 初始化
+        createGridDOM();
+        initGrid();
+    </script>
+</body>
+</html>
