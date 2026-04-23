@@ -3,247 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>康威生命游戏</title>
+    <title>AI要闻简报</title>
     <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+            padding: 36px 28px 32px;
+            max-width: 480px;
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 22px;
+            color: #1a1a2e;
+            text-align: center;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #888;
+            font-size: 13px;
+            margin-bottom: 28px;
+        }
+
+        .section-title {
+            font-size: 12px;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            margin-top: 24px;
+        }
+
+        .links {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            background-color: #f0f0f0;
+            gap: 12px;
         }
-        
-        h1 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-        
-        #grid {
-            display: grid;
-            grid-template-columns: repeat(20, 25px);
-            gap: 1px;
-            background-color: #ccc;
-            padding: 1px;
-            margin-bottom: 20px;
-        }
-        
-        .cell {
-            width: 25px;
-            height: 25px;
-            background-color: #fff;
-            cursor: pointer;
-        }
-        
-        .cell.alive {
-            background-color: #2ecc71;
-        }
-        
-        .controls {
+
+        .link-card {
             display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: transform 0.15s, box-shadow 0.15s;
         }
-        
-        button {
-            padding: 10px 20px;
-            font-size: 14px;
-            cursor: pointer;
-            border: none;
-            border-radius: 4px;
-            background-color: #3498db;
-            color: white;
-            transition: background-color 0.3s;
+
+        .link-card:active { transform: scale(0.97); }
+
+        .link-card.com {
+            background: #e8f4fd;
+            color: #1565c0;
         }
-        
-        button:hover {
-            background-color: #2980b9;
+        .link-card.pub {
+            background: #e8f5e9;
+            color: #2e7d32;
         }
-        
-        button:disabled {
-            background-color: #95a5a6;
-            cursor: not-allowed;
+        .link-card.tec {
+            background: #fce4ec;
+            color: #c62828;
         }
-        
-        .info {
-            color: #666;
-            font-size: 14px;
+
+        .link-card .icon {
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .audio-section {
+            margin-top: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .audio-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 12px 16px;
+        }
+
+        .audio-label {
+            font-size: 13px;
+            color: #555;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        audio {
+            width: 100%;
+            height: 36px;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 28px;
+            font-size: 12px;
+            color: #bbb;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            body { background: #181c24; }
+            .container { background: #23283a; box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
+            h1 { color: #e8eaf6; }
+            .subtitle { color: #666; }
+            .section-title { color: #555; }
+            .link-card.com { background: #1a2a3a; color: #64b5f6; }
+            .link-card.pub { background: #1a2e1a; color: #81c784; }
+            .link-card.tec { background: #2e1a1a; color: #ef9a9a; }
+            .audio-item { background: #1a1e2a; }
+            .audio-label { color: #aaa; }
+            .footer { color: #444; }
         }
     </style>
 </head>
 <body>
-    <h1>康威生命游戏</h1>
-    
-    <div class="controls">
-        <button id="startBtn">开始</button>
-        <button id="pauseBtn" disabled>暂停</button>
-        <button id="resetBtn">重置</button>
-        <button id="stepBtn">单步</button>
-    </div>
-    
-    <div class="info">
-        <p>代数: <span id="generation">0</span></p>
-    </div>
-    
-    <div id="grid"></div>
-    
-    <div class="info">
-        <p>规则：孤独死亡(&lt;2邻居) | 拥挤死亡(&gt;3邻居) | 平衡存活(2-3邻居) | 繁殖(正好3邻居)</p>
-    </div>
+    <div class="container">
+        <h1>AI 要闻简报</h1>
+        <p class="subtitle">每日更新 · 三大版本</p>
 
-    <script>
-        const GRID_SIZE = 20;
-        const ALIVE_PROBABILITY = 0.2;
-        let grid = [];
-        let generation = 0;
-        let isRunning = false;
-        let intervalId = null;
-        
-        const gridElement = document.getElementById('grid');
-        const startBtn = document.getElementById('startBtn');
-        const pauseBtn = document.getElementById('pauseBtn');
-        const resetBtn = document.getElementById('resetBtn');
-        const stepBtn = document.getElementById('stepBtn');
-        const generationSpan = document.getElementById('generation');
-        
-        // 初始化网格
-        function initGrid() {
-            grid = [];
-            for (let i = 0; i < GRID_SIZE; i++) {
-                grid[i] = [];
-                for (let j = 0; j < GRID_SIZE; j++) {
-                    grid[i][j] = Math.random() < ALIVE_PROBABILITY ? 1 : 0;
-                }
-            }
-            generation = 0;
-            updateDisplay();
-        }
-        
-        // 创建网格DOM
-        function createGridDOM() {
-            gridElement.innerHTML = '';
-            for (let i = 0; i < GRID_SIZE; i++) {
-                for (let j = 0; j < GRID_SIZE; j++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'cell';
-                    cell.dataset.row = i;
-                    cell.dataset.col = j;
-                    cell.addEventListener('click', toggleCell);
-                    gridElement.appendChild(cell);
-                }
-            }
-        }
-        
-        // 切换细胞状态
-        function toggleCell(e) {
-            if (isRunning) return;
-            const row = parseInt(e.target.dataset.row);
-            const col = parseInt(e.target.dataset.col);
-            grid[row][col] = grid[row][col] ? 0 : 1;
-            updateDisplay();
-        }
-        
-        // 计算邻居数量
-        function countNeighbors(row, col) {
-            let count = 0;
-            for (let i = -1; i <= 1; i++) {
-                for (let j = -1; j <= 1; j++) {
-                    if (i === 0 && j === 0) continue;
-                    const newRow = (row + i + GRID_SIZE) % GRID_SIZE;
-                    const newCol = (col + j + GRID_SIZE) % GRID_SIZE;
-                    count += grid[newRow][newCol];
-                }
-            }
-            return count;
-        }
-        
-        // 更新网格（应用生命游戏规则）
-        function updateGrid() {
-            const newGrid = [];
-            for (let i = 0; i < GRID_SIZE; i++) {
-                newGrid[i] = [];
-                for (let j = 0; j < GRID_SIZE; j++) {
-                    const neighbors = countNeighbors(i, j);
-                    const isAlive = grid[i][j];
-                    
-                    if (isAlive) {
-                        // 活细胞规则
-                        if (neighbors < 2 || neighbors > 3) {
-                            newGrid[i][j] = 0; // 孤独死亡或拥挤死亡
-                        } else {
-                            newGrid[i][j] = 1; // 平衡存活
-                        }
-                    } else {
-                        // 死细胞规则
-                        if (neighbors === 3) {
-                            newGrid[i][j] = 1; // 繁殖
-                        } else {
-                            newGrid[i][j] = 0;
-                        }
-                    }
-                }
-            }
-            grid = newGrid;
-            generation++;
-            updateDisplay();
-        }
-        
-        // 更新显示
-        function updateDisplay() {
-            const cells = gridElement.querySelectorAll('.cell');
-            cells.forEach(cell => {
-                const row = parseInt(cell.dataset.row);
-                const col = parseInt(cell.dataset.col);
-                if (grid[row][col]) {
-                    cell.classList.add('alive');
-                } else {
-                    cell.classList.remove('alive');
-                }
-            });
-            generationSpan.textContent = generation;
-        }
-        
-        // 开始
-        function start() {
-            if (isRunning) return;
-            isRunning = true;
-            startBtn.disabled = true;
-            pauseBtn.disabled = false;
-            stepBtn.disabled = true;
-            intervalId = setInterval(updateGrid, 200);
-        }
-        
-        // 暂停
-        function pause() {
-            if (!isRunning) return;
-            isRunning = false;
-            startBtn.disabled = false;
-            pauseBtn.disabled = true;
-            stepBtn.disabled = false;
-            clearInterval(intervalId);
-        }
-        
-        // 重置
-        function reset() {
-            pause();
-            initGrid();
-        }
-        
-        // 单步执行
-        function step() {
-            if (isRunning) return;
-            updateGrid();
-        }
-        
-        // 事件监听
-        startBtn.addEventListener('click', start);
-        pauseBtn.addEventListener('click', pause);
-        resetBtn.addEventListener('click', reset);
-        stepBtn.addEventListener('click', step);
-        
-        // 初始化
-        createGridDOM();
-        initGrid();
-    </script>
+        <div class="section-title">阅读全文</div>
+        <div class="links">
+            <a class="link-card com" href="com.html" target="_blank">
+                <span class="icon">💼</span>
+                <span>商务版</span>
+            </a>
+            <a class="link-card pub" href="pub.html" target="_blank">
+                <span class="icon">📰</span>
+                <span>基础版</span>
+            </a>
+            <a class="link-card tec" href="tec.html" target="_blank">
+                <span class="icon">🔬</span>
+                <span>技术版</span>
+            </a>
+        </div>
+
+        <div class="section-title">收听音频</div>
+        <div class="audio-section">
+            <div class="audio-item">
+                <div class="audio-label">💼 商务版</div>
+                <audio controls preload="none">
+                    <source src="com.wav" type="audio/wav">
+                </audio>
+            </div>
+            <div class="audio-item">
+                <div class="audio-label">📰 基础版</div>
+                <audio controls preload="none">
+                    <source src="pub.wav" type="audio/wav">
+                </audio>
+            </div>
+            <div class="audio-item">
+                <div class="audio-label">🔬 技术版</div>
+                <audio controls preload="none">
+                    <source src="tec.wav" type="audio/wav">
+                </audio>
+            </div>
+        </div>
+
+        <div class="footer">Powered by AI · 每日自动更新</div>
+    </div>
 </body>
 </html>
